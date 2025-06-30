@@ -1,0 +1,24 @@
+/*
+  This tells Tailwind to inject its base styles, component classes,
+  and utility classes into the CSS file. This is required for Tailwind to work.
+*/
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+  These are the custom styles that were previously in the <style> tag
+  in your manager.html file.
+*/
+.tab-button {
+    transition: all 0.2s ease-in-out;
+}
+.tab-button.active {
+    border-color: #3b82f6;
+    color: #3b82f6;
+    background-color: #eff6ff;
+}
+.employee-button.active {
+     background-color: #3b82f6;
+     color: white;
+}

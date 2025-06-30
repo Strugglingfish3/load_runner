@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manager Dashboard</title>
+    <!-- Vite will inject all necessary CSS and JS links here during the build process -->
+</head>
+<body class="bg-gray-100 font-sans antialiased text-gray-800">
+
+    <div id="app-container">
+        <!-- Login View -->
+        <div id="auth-view" class="min-h-screen flex items-center justify-center">
+            <div class="max-w-md w-full bg-white rounded-2xl shadow-xl p-8">
+                <div class="text-center mb-8">
+                    <h1 class="text-3xl font-bold text-gray-900">Manager Login</h1>
+                    <p class="text-gray-500 mt-2">Access analytics for your store.</p>
+                </div>
+                
+                <form id="auth-form" class="space-y-6">
+                    <div>
+                        <label for="username" class="block text-sm font-medium">Manager Username</label>
+                        <input id="username" type="text" autocomplete="username" required class="mt-1 w-full p-3 border border-gray-300 rounded-lg">
+                    </div>
+                    <div>
+                        <label for="password" class="block text-sm font-medium">Password</label>
+                        <input id="password" type="password" autocomplete="current-password" required class="mt-1 w-full p-3 border border-gray-300 rounded-lg">
+                    </div>
+                    <p id="auth-error" class="text-sm text-red-600 text-center hidden"></p>
+                    <div>
+                        <button type="submit" class="w-full flex justify-center py-3 px-4 rounded-lg shadow-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
+                            Sign in
+                        </button>
+                    </div>
+                </form>
+
+                <div class="mt-6 text-center">
+                    <a id="login-back-button" href="/timer.html" class="text-sm font-medium text-blue-600 hover:underline">
+                        &larr; Back to Timer Page
+                    </a>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Dashboard View -->
+        <div id="dashboard-view" class="hidden">
+             <header class="bg-white shadow-md">
+                <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+                    <h1 class="text-2xl font-bold text-gray-900">Dashboard: <span id="store-id-display" class="text-blue-600"></span></h1>
+                    <div class="flex items-center">
+                        <span id="manager-username" class="text-sm text-gray-600 mr-4"></span>
+                        <button id="logout-button" class="py-2 px-4 rounded-lg shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700">Logout</button>
+                    </div>
+                </div>
+            </header>
+
+            <main class="container mx-auto p-4 md:p-8">
+                <a id="back-to-timer-link" href="/timer.html" class="inline-block mb-6 text-blue-600 hover:underline">&larr; Back to Timer Page</a>
+
+                <div class="border-b border-gray-200 mb-6">
+                    <nav class="-mb-px flex space-x-6 overflow-x-auto" aria-label="Tabs">
+                        <button data-tab="activity" class="tab-button active whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Activity</button>
+                        <button data-tab="rankings" class="tab-button text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Monthly Rankings</button>
+                        <button data-tab="details" class="tab-button text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Detailed View</button>
+                        <button data-tab="graph" class="tab-button text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Performance Graph</button>
+                        <button data-tab="employees" class="tab-button text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Employees</button>
+                        <button data-tab="roster" class="tab-button text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Auto Roster</button>
+                    </nav>
+                </div>
+                
+                <div id="view-content-placeholder" class="text-center text-gray-500 py-16">
+                    <p>Loading data...</p>
+                </div>
+
+                <!-- Views Container -->
+                <div id="activity-view" class="view hidden">
+                    <div class="bg-white rounded-2xl shadow-xl p-6 mb-8 flex flex-wrap items-center justify-between gap-4">
+                        <h2 class="text-xl font-bold text-gray-800">Browse Activity</h2>
+                        <div class="flex items-center gap-4">
+                            <button id="prev-day-btn" class="px-3 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">&larr;</button>
+                            <input type="date" id="date-picker" class="p-2 border border-gray-300 rounded-lg">
+                            <button id="next-day-btn" class="px-3 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">&rarr;</button>
+                        </div>
+                    </div>
+                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <div class="lg:col-span-1">
+                            <div class="bg-white rounded-2xl shadow-xl p-6">
+                                <h2 class="text-xl font-bold mb-4">Employees with Activity</h2>
+                                <div id="activity-employee-list" class="space-y-2"></div>
+                            </div>
+                        </div>
+                        <div class="lg:col-span-2">
+                            <div id="activity-details-placeholder" class="h-full flex items-center justify-center bg-white rounded-2xl shadow-xl p-6">
+                                <p class="text-gray-500">Select an employee to view their loads from the selected date.</p>
+                            </div>
+                            <div id="activity-details-container" class="hidden space-y-4"></div>
+                        </div>
+                     </div>
+                </div>
+
+                <div id="rankings-view" class="view hidden">
+                    <h2 class="text-xl font-bold mb-4 text-gray-800">Top Performers by Category (Current Month)</h2>
+                    <div id="rankings-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"></div>
+                </div>
+
+                <div id="details-view" class="view hidden">
+                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <div class="lg:col-span-1">
+                            <div class="bg-white rounded-2xl shadow-xl p-6">
+                                <h2 class="text-xl font-bold mb-4">Select Employee</h2>
+                                <div id="details-employee-list" class="space-y-2"></div>
+                            </div>
+                            <div class="bg-white rounded-2xl shadow-xl p-6 mt-8">
+                                <h2 class="text-xl font-bold mb-4">Store Monthly Averages</h2>
+                                <div id="store-averages-details"></div>
+                            </div>
+                        </div>
+                        <div class="lg:col-span-2">
+                            <div id="employee-details-placeholder" class="h-full flex items-center justify-center bg-white rounded-2xl shadow-xl p-6">
+                                <p class="text-gray-500">Select an employee to view their detailed stats.</p>
+                            </div>
+                            <div id="employee-details-container" class="hidden space-y-6"></div>
+                        </div>
+                     </div>
+                </div>
+
+                <div id="graph-view" class="view hidden">
+                    <div class="bg-white rounded-2xl shadow-xl p-6">
+                        <h2 class="text-xl font-bold mb-4 text-gray-800">Monthly Performance (Last 12 Months)</h2>
+                        <div id="graph-category-filters" class="flex flex-wrap gap-4 mb-4">
+                            <!-- Category checkboxes will be injected here -->
+                        </div>
+                        <canvas id="performance-chart"></canvas>
+                        <p id="graph-placeholder" class="text-center text-gray-500 py-16 hidden">No data available to build graph.</p>
+                    </div>
+                </div>
+
+                <div id="employees-view" class="view hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <div class="bg-white rounded-2xl shadow-xl p-6">
+                                <h2 class="text-xl font-bold mb-4">Current Employees</h2>
+                                <div id="employee-management-list" class="space-y-3"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="bg-white rounded-2xl shadow-xl p-6">
+                                <h2 class="text-xl font-bold mb-4">Add New Employee</h2>
+                                <form id="add-employee-form" class="space-y-4">
+                                    <div>
+                                        <label for="first-name-input" class="block text-sm font-medium text-gray-700">First Name</label>
+                                        <input type="text" id="first-name-input" required class="mt-1 w-full p-3 border border-gray-300 rounded-lg">
+                                    </div>
+                                    <div>
+                                        <label for="last-name-input" class="block text-sm font-medium text-gray-700">Last Name</label>
+                                        <input type="text" id="last-name-input" required class="mt-1 w-full p-3 border border-gray-300 rounded-lg">
+                                    </div>
+                                    <button type="submit" class="w-full py-3 px-4 rounded-lg shadow-sm font-medium text-white bg-blue-600 hover:bg-blue-700">Add Employee</button>
+                                </form>
+                            </div>
+                            <div class="bg-red-50 border-l-4 border-red-400 p-6 rounded-2xl shadow-xl mt-8">
+                                <h2 class="text-xl font-bold mb-2 text-red-800">Store Settings</h2>
+                                <p class="text-red-700 text-sm mb-4">Warning: The action below is permanent and cannot be undone.</p>
+                                <button id="open-reset-modal-button" class="w-full py-3 px-4 rounded-lg shadow-sm font-medium text-white bg-red-600 hover:bg-red-700">Reset All Load Times</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="roster-view" class="view hidden">
+                    <div class="bg-white rounded-2xl shadow-xl p-6">
+                        <div class="flex flex-wrap justify-between items-center mb-4 gap-4">
+                            <h2 class="text-xl font-bold">Weekly Roster</h2>
+                            <div class="flex items-center gap-2">
+                                <button id="roster-prev-week-btn" class="px-3 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">&larr; Previous Week</button>
+                                <span id="roster-week-display" class="font-semibold text-gray-700"></span>
+                                <button id="roster-next-week-btn" class="px-3 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">Next Week &rarr;</button>
+                            </div>
+                             <div class="flex items-center gap-2">
+                                <button id="roster-rules-button" class="py-2 px-4 rounded-lg shadow-sm text-sm font-medium text-white bg-gray-600 hover:bg-gray-700">Roster Rules</button>
+                                <button id="generate-roster-button" class="py-2 px-4 rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">Generate Roster</button>
+                            </div>
+                        </div>
+                        <div id="roster-grid-container" class="overflow-x-auto">
+                             <!-- Roster will be injected here -->
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    
+    <!-- Modals -->
+    <div id="reset-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center z-50">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 m-4 max-w-sm w-full">
+            <h2 class="text-2xl font-bold text-red-800 mb-4">Are you absolutely sure?</h2>
+            <p class="text-gray-700 mb-4">This action will permanently delete all load time records for this store. This cannot be undone.</p>
+            <p class="text-gray-700 mb-4">To confirm, please type <strong class="text-red-600">RESET</strong> into the box below.</p>
+            <input type="text" id="reset-confirm-input" class="w-full p-3 border border-gray-300 rounded-lg mb-4" placeholder="RESET">
+            <div class="flex justify-end space-x-4">
+                <button id="cancel-reset-button" class="py-2 px-4 rounded-lg font-medium bg-gray-200 hover:bg-gray-300">Cancel</button>
+                <button id="confirm-reset-button" class="py-2 px-4 rounded-lg font-medium text-white bg-red-400 cursor-not-allowed" disabled>Confirm Reset</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="employee-settings-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center z-50">
+         <div class="bg-white rounded-2xl shadow-2xl p-8 m-4 max-w-lg w-full">
+            <h2 class="text-2xl font-bold text-gray-900 mb-4">Edit Employee: <span id="settings-employee-name"></span></h2>
+            <form id="employee-settings-form">
+                <input type="hidden" id="settings-employee-id">
+                <div class="space-y-6">
+                    <div>
+                        <label for="contract-hours" class="block text-sm font-medium text-gray-700">Contract Hours</label>
+                        <input type="number" id="contract-hours" class="mt-1 w-full p-3 border border-gray-300 rounded-lg">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Days Off</label>
+                        <div id="days-off-checkboxes" class="mt-2 grid grid-cols-3 sm:grid-cols-4 gap-4">
+                            <!-- Checkboxes will be injected here -->
+                        </div>
+                    </div>
+                    <div>
+                        <label for="time-off-notes" class="block text-sm font-medium text-gray-700">Time Off Notes</label>
+                        <textarea id="time-off-notes" rows="3" class="mt-1 w-full p-3 border border-gray-300 rounded-lg"></textarea>
+                    </div>
+                    <div>
+                         <label for="manager-role" class="block text-sm font-medium text-gray-700">Manager Role</label>
+                         <select id="manager-role" class="mt-1 w-full p-3 border border-gray-300 rounded-lg">
+                            <option value="Not a Manager">Not a Manager</option>
+                            <option value="RSM">RSM</option>
+                            <option value="DSM">DSM</option>
+                            <option value="ASM">ASM</option>
+                         </select>
+                    </div>
+                </div>
+                <div class="mt-8 flex justify-end space-x-4">
+                    <button type="button" id="cancel-settings-button" class="py-2 px-4 rounded-lg font-medium bg-gray-200 hover:bg-gray-300">Cancel</button>
+                    <button type="submit" class="py-2 px-4 rounded-lg font-medium text-white bg-blue-600 hover:bg-blue-700">Save Changes</button>
+                </div>
+            </form>
+         </div>
+    </div>
+
+    <div id="roster-rules-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center z-50">
+         <div class="bg-white rounded-2xl shadow-2xl p-8 m-4 max-w-2xl w-full">
+            <h2 class="text-2xl font-bold text-gray-900 mb-4">Auto Roster Rules</h2>
+            <p class="text-gray-600 mb-4">Enter the rules for generating the roster. Each rule should be a new bullet point.</p>
+            <form id="roster-rules-form">
+                <textarea id="roster-rules-input" rows="10" class="w-full p-3 border border-gray-300 rounded-lg" placeholder="- Managers cannot work on weekends.&#10;- A minimum of 3 employees must be on shift."></textarea>
+                <div class="mt-6 flex justify-end space-x-4">
+                    <button type="button" id="cancel-roster-rules-button" class="py-2 px-4 rounded-lg font-medium bg-gray-200 hover:bg-gray-300">Close</button>
+                    <button type="submit" class="py-2 px-4 rounded-lg font-medium text-white bg-blue-600 hover:bg-blue-700">Save Rules</button>
+                </div>
+            </form>
+         </div>
+    </div>
+
+    <div id="generate-roster-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center z-50">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 m-4 max-w-md w-full">
+            <h2 class="text-2xl font-bold text-gray-900 mb-4">Generate Roster</h2>
+            <p class="text-gray-600 mb-4">Select the date range for the roster.</p>
+            <form id="generate-roster-form" class="space-y-4">
+                <div>
+                    <label for="roster-start-date" class="block text-sm font-medium text-gray-700">Start Date</label>
+                    <input type="date" id="roster-start-date" required class="mt-1 w-full p-3 border border-gray-300 rounded-lg">
+                </div>
+                <div>
+                    <label for="roster-end-date" class="block text-sm font-medium text-gray-700">End Date</label>
+                    <input type="date" id="roster-end-date" required class="mt-1 w-full p-3 border border-gray-300 rounded-lg">
+                </div>
+                <div id="roster-generation-error" class="text-red-500 text-sm hidden"></div>
+                <div class="pt-4 flex justify-end space-x-4">
+                    <button type="button" id="cancel-generate-roster-button" class="py-2 px-4 rounded-lg font-medium bg-gray-200 hover:bg-gray-300">Cancel</button>
+                    <button type="submit" class="py-2 px-4 rounded-lg font-medium text-white bg-blue-600 hover:bg-blue-700">Generate</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- This is the single entry point for all JavaScript in this page -->
+    <script type="module" src="/src/manager.js"></script>
+</body>
+</html>

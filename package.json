@@ -1,0 +1,25 @@
+{
+  "name": "load_runner",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "tailwind-init": "tailwindcss init -p"
+  },
+  "devDependencies": {
+    "vite": "^7.0.0"
+  },
+  "dependencies": {
+    "@google/genai": "^1.7.0",
+    "@google/generative-ai": "^0.24.1",
+    "@tailwindcss/postcss": "^4.1.11",
+    "autoprefixer": "^10.4.21",
+    "chart.js": "^4.5.0",
+    "firebase": "^11.9.1",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.11"
+  }
+}
