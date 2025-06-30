@@ -4,7 +4,35 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manager Dashboard</title>
-    <!-- Vite will inject all necessary CSS and JS links here during the build process -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chart.js for graphing -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        .tab-button {
+            transition: all 0.2s ease-in-out;
+        }
+        .tab-button.active {
+            border-color: #3b82f6;
+            color: #3b82f6;
+            background-color: #eff6ff;
+        }
+        .employee-button.active {
+             background-color: #3b82f6;
+             color: white;
+        }
+    </style>
 </head>
 <body class="bg-gray-100 font-sans antialiased text-gray-800">
 
@@ -178,6 +206,7 @@
                                 <button id="roster-next-week-btn" class="px-3 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">Next Week &rarr;</button>
                             </div>
                              <div class="flex items-center gap-2">
+                                <button id="reset-roster-button" class="py-2 px-4 rounded-lg shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700">Reset All Rosters</button>
                                 <button id="roster-rules-button" class="py-2 px-4 rounded-lg shadow-sm text-sm font-medium text-white bg-gray-600 hover:bg-gray-700">Roster Rules</button>
                                 <button id="generate-roster-button" class="py-2 px-4 rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">Generate Roster</button>
                             </div>

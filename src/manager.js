@@ -1,7 +1,7 @@
 // =================================================================
 // 1. IMPORT LIBRARIES & STYLES
 // =================================================================
-import './style.css'; // This loads all the Tailwind and custom styles
+import './style.css'; // This loads all the Tailwind and custom styles for this page.
 
 // Import libraries from node_modules
 import { initializeApp } from 'firebase/app';
@@ -14,10 +14,6 @@ import Chart from 'chart.js/auto';
 // =================================================================
 // 2. CONFIGURATION & INITIALIZATION
 // =================================================================
-
-// For better security, you should store your API keys in a `.env.local` file 
-// in your project's root folder and access them via `import.meta.env`.
-// I have left your hardcoded keys to get you up and running quickly.
 
 const firebaseConfig = {
     apiKey: "AIzaSyB_XSg51lZyNPTkjBLOArym9xRpSb6tuns",
@@ -93,6 +89,8 @@ const App = {
             generateRosterModal: document.getElementById('generate-roster-modal'),
             generateRosterForm: document.getElementById('generate-roster-form'),
             cancelGenerateRosterButton: document.getElementById('cancel-generate-roster-button'),
+            // New element for the reset button
+            resetRosterButton: document.getElementById('reset-roster-button'),
         };
         
         const firebaseApp = initializeApp(firebaseConfig);
@@ -141,6 +139,10 @@ const App = {
         App.elements.generateRosterButton.addEventListener('click', Views.Roster.openGenerateModal);
         App.elements.cancelGenerateRosterButton.addEventListener('click', () => App.elements.generateRosterModal.classList.add('hidden'));
         App.elements.generateRosterForm.addEventListener('submit', Views.Roster.generateRoster);
+        // New listener for the reset button
+        if (App.elements.resetRosterButton) {
+            App.elements.resetRosterButton.addEventListener('click', Views.Roster.resetRosters);
+        }
     },
     
     handleAuthChanges() {
@@ -381,7 +383,7 @@ const UI = {
         else if (tabName === 'rankings' || tabName === 'details') await Views.Monthly.render();
         else if (tabName === 'graph') await Views.Graph.render();
         else if (tabName === 'employees') Views.Employees.render();
-        else if (tabName === 'roster') Views.Roster.render();
+        else if (tabName === 'roster') await Views.Roster.render();
         this.showPlaceholder(false);
         this.showView(tabName);
     },
@@ -651,7 +653,43 @@ const Views = {
         }
     },
     Roster: {
-        render(rosterData = null) {
+        async render() {
+            let currentDate = App.state.rosterStartDate || new Date();
+            if (!App.state.rosterStartDate) {
+                const dayOfWeek = currentDate.getDay();
+                const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+                currentDate.setDate(currentDate.getDate() + diff);
+                App.state.rosterStartDate = new Date(currentDate);
+            } else {
+                currentDate = new Date(App.state.rosterStartDate);
+            }
+            
+            const weekDates = [];
+            for (let i = 0; i < 7; i++) {
+                const date = new Date(currentDate);
+                date.setDate(currentDate.getDate() + i);
+                weekDates.push(date.toISOString().split('T')[0]);
+            }
+
+            const rosterPromises = weekDates.map(dateStr => {
+                const rosterRef = doc(App.db, `stores/${App.storeId}/rosters`, dateStr);
+                return getDoc(rosterRef);
+            });
+
+            const rosterSnapshots = await Promise.all(rosterPromises);
+            
+            const weeklyRosterData = { roster: {} };
+            rosterSnapshots.forEach((snap, index) => {
+                if (snap.exists()) {
+                    const dateKey = weekDates[index];
+                    weeklyRosterData.roster[dateKey] = snap.data().shifts;
+                }
+            });
+
+            this.renderGrid(weeklyRosterData);
+        },
+
+        renderGrid(weeklyRosterData = { roster: {} }) {
             const employees = Object.values(App.state.employees)
                 .filter(employee => employee.name !== 'Transferred Employee');
             
@@ -663,23 +701,7 @@ const Views = {
             employees.sort((a, b) => getLastName(a.name).localeCompare(getLastName(b.name)));
 
             const days = [];
-            let currentDate;
-
-            if (rosterData) {
-                const start = new Date(Object.keys(rosterData.roster)[0] + 'T00:00:00'); // Ensure it's parsed as local time
-                currentDate = new Date(start);
-                App.state.rosterStartDate = start;
-            } else {
-                currentDate = App.state.rosterStartDate || new Date();
-                if (!App.state.rosterStartDate) {
-                    const dayOfWeek = currentDate.getDay();
-                    const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-                    currentDate.setDate(currentDate.getDate() + diff);
-                    App.state.rosterStartDate = new Date(currentDate);
-                } else {
-                    currentDate = new Date(App.state.rosterStartDate);
-                }
-            }
+            let currentDate = new Date(App.state.rosterStartDate);
             
             for (let i = 0; i < 7; i++) {
                 days.push(new Date(currentDate));
@@ -704,8 +726,8 @@ const Views = {
                 days.forEach(day => {
                     const dateKey = day.toISOString().split('T')[0];
                     let shift = "";
-                    if (rosterData && rosterData.roster && rosterData.roster[dateKey]) {
-                        const dayRoster = rosterData.roster[dateKey];
+                    if (weeklyRosterData.roster && weeklyRosterData.roster[dateKey]) {
+                        const dayRoster = weeklyRosterData.roster[dateKey];
                         const employeeShift = dayRoster.find(s => s.employeeName === employee.name);
                         if (employeeShift) {
                             shift = employeeShift.shift.replace(/\s+/g, ' ').trim();
@@ -725,15 +747,15 @@ const Views = {
         },
         openGenerateModal() {
             const today = new Date();
-            const nextMonday = new Date(today);
-            nextMonday.setDate(today.getDate() + (1 + 7 - today.getDay()) % 7);
-            if (today.getDay() === 1) nextMonday.setDate(today.getDate());
+            const day = today.getDay();
+            const diff = today.getDate() - day + (day === 0 ? -6 : 1); 
+            const monday = new Date(today.setDate(diff));
 
-            const nextSunday = new Date(nextMonday);
-            nextSunday.setDate(nextMonday.getDate() + 6);
+            const sunday = new Date(monday);
+            sunday.setDate(monday.getDate() + 6);
             
-            document.getElementById('roster-start-date').valueAsDate = nextMonday;
-            document.getElementById('roster-end-date').valueAsDate = nextSunday;
+            document.getElementById('roster-start-date').valueAsDate = monday;
+            document.getElementById('roster-end-date').valueAsDate = sunday;
             App.elements.generateRosterModal.classList.remove('hidden');
         },
         async openRulesModal() {
@@ -764,10 +786,10 @@ const Views = {
 
             UI.setLoading(true);
 
-            const startDate = document.getElementById('roster-start-date').value;
-            const endDate = document.getElementById('roster-end-date').value;
+            const startDateString = document.getElementById('roster-start-date').value;
+            const endDateString = document.getElementById('roster-end-date').value;
 
-            if (!startDate || !endDate) {
+            if (!startDateString || !endDateString) {
                 alert("Please select a valid date range.");
                 UI.setLoading(false);
                 return;
@@ -791,7 +813,7 @@ const Views = {
             
             const prompt = `
                 You are a roster generation assistant for a retail store.
-                Generate a daily roster for the period from ${startDate} to ${endDate}.
+                Generate a daily roster for the period from ${startDateString} to ${endDateString}.
 
                 Here are the employees and their details:
                 ${JSON.stringify(employeeData, null, 2)}
@@ -806,6 +828,7 @@ const Views = {
                 Each employee shift object should have two keys: "employeeName" and "shift".
                 The "shift" value should be a string representing their work hours (e.g., "9:00 - 17:00", "OFF", "Day Off").
                 Ensure every employee listed in the input data is included in the roster for every single day in the date range.
+                Contract hours are fortnightly so they have to meet their contract hours every fortnight they can go slightly over but never below.
 
                 Example of expected JSON format:
                 {
@@ -827,7 +850,6 @@ const Views = {
                 const response = result.response;
                 const text = response.text();
                 
-                // FIXED: More robust JSON parsing
                 const startIndex = text.indexOf('{');
                 const endIndex = text.lastIndexOf('}');
                 
@@ -839,21 +861,66 @@ const Views = {
                 const rosterJson = JSON.parse(jsonString);
 
                 if (rosterJson.roster) {
-                    Views.Roster.render(rosterJson);
+                    const dailyRosters = rosterJson.roster;
+                    const savePromises = [];
+
+                    for (const dateKey in dailyRosters) {
+                        const dailyShifts = dailyRosters[dateKey];
+                        const rosterRef = doc(App.db, `stores/${App.storeId}/rosters`, dateKey);
+                        savePromises.push(setDoc(rosterRef, { shifts: dailyShifts }));
+                    }
+
+                    await Promise.all(savePromises);
+                    
+                    console.log('Roster successfully saved to Firestore day by day!');
+                    alert('Roster generated and saved successfully!');
+
+                    await Views.Roster.render();
+
                 } else {
                     throw new Error("Invalid JSON format from AI: 'roster' key missing.");
                 }
 
             } catch (error) {
-                console.error("Error generating roster:", error);
-                alert("Failed to generate roster. Please check the console for details and ensure your API key is correct.");
+                console.error("CRITICAL ERROR in generateRoster:", error);
+                alert(`Failed to generate or save roster. Please check the console for details. Error: ${error.message}`);
             } finally {
                 UI.setLoading(false);
                 App.elements.generateRosterModal.classList.add('hidden');
+            }
+        },
+        async resetRosters() {
+            if (!window.confirm("Are you sure you want to delete ALL saved rosters for this store? This action cannot be undone.")) {
+                return;
+            }
+        
+            UI.setLoading(true);
+            const rostersRef = collection(App.db, `stores/${App.storeId}/rosters`);
+            try {
+                const snapshot = await getDocs(rostersRef);
+                if (snapshot.empty) {
+                    alert('There are no saved rosters to delete.');
+                    return;
+                }
+        
+                const batch = writeBatch(App.db);
+                snapshot.docs.forEach(doc => {
+                    batch.delete(doc.ref);
+                });
+        
+                await batch.commit();
+                alert('All saved rosters have been successfully deleted.');
+                await Views.Roster.render();
+        
+            } catch (error) {
+                console.error("Error deleting rosters:", error);
+                alert("An error occurred while trying to delete the rosters. Please check the console for details.");
+            } finally {
+                UI.setLoading(false);
             }
         }
     }
 };
 
-// This is the correct way to start the app, ensuring the DOM is ready.
+// Start the application after the DOM is fully loaded.
 document.addEventListener('DOMContentLoaded', App.init);
