@@ -1,7 +1,7 @@
 // =================================================================
 // 1. IMPORT LIBRARIES & STYLES
 // =================================================================
-import './style.css'; // This loads all the Tailwind and custom styles for this page.
+import './style.css'; 
 
 // Import libraries from node_modules
 import { initializeApp } from 'firebase/app';
@@ -16,16 +16,16 @@ import Chart from 'chart.js/auto';
 // =================================================================
 
 const firebaseConfig = {
-    apiKey: "AIzaSyB_XSg51lZyNPTkjBLOArym9xRpSb6tuns",
-    authDomain: "loadrun-c4365.firebaseapp.com",
-    projectId: "loadrun-c4365",
-    storageBucket: "loadrun-c4365.firebasestorage.app",
-    messagingSenderId: "641396100606",
-    appId: "1:641396100606:web:6bf7dbfaac26905356c4af",
-    measurementId: "G-K9JZLVSNH2"
+    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+    appId: import.meta.env.VITE_FIREBASE_APP_ID,
+    measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
-const GEMINI_API_KEY = "AIzaSyCDEZod-ZzY81kOMY0fUKbPN48uTAwVfjM";
+const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 
 // Initialize Gemini AI
 const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
