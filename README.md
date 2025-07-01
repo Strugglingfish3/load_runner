@@ -66,11 +66,10 @@ A comprehensive web application designed to track employee load-running performa
 
 ## Setup and Installation
 
-### 1. Clone the Repository
+
 
 ```bash
-git clone [https://github.com/your-username/your-repo-name.git](https://github.com/your-username/your-repo-name.git)
-cd your-repo-name
+1. Clone the Repository
 
 2. Install Dependencies
 Install all the necessary packages using npm.
