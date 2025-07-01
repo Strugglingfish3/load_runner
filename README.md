@@ -47,19 +47,19 @@ A comprehensive web application designed to track employee load-running performa
 
 
 /
-├── dist/              # The build output directory for deployment
-├── node_modules/      # Project dependencies
-├── src/
-│   ├── manager.js     # Logic for the manager dashboard
-│   ├── style.css      # Main stylesheet (Tailwind & custom)
-│   └── timer.js       # Logic for the employee timer page
-├── .env.local         # Local environment variables (API keys) - MUST be created
-├── .gitignore         # Files to be ignored by Git
-├── index.html         # Store login page
-├── manager.html       # Manager dashboard page
-├── timer.html         # Employee timer page
-├── package.json       # Project dependencies and scripts
-└── vite.config.js     # Vite configuration for multiple pages
+├── dist/              # The build output directory for deployment <br/>
+├── node_modules/      # Project dependencies <br/>
+├── src/ <br/>
+│   ├── manager.js     # Logic for the manager dashboard <br/>
+│   ├── style.css      # Main stylesheet (Tailwind & custom) <br/>
+│   └── timer.js       # Logic for the employee timer page <br/>
+├── .env.local         # Local environment variables (API keys) - MUST be created <br/>
+├── .gitignore         # Files to be ignored by Git <br/>
+├── index.html         # Store login page <br/>
+├── manager.html       # Manager dashboard page <br/>
+├── timer.html         # Employee timer page <br/>
+├── package.json       # Project dependencies and scripts <br/>
+└── vite.config.js     # Vite configuration for multiple pages <br/>
 
 
 ---
