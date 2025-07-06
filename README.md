@@ -46,7 +46,7 @@ A comprehensive web application designed to track employee load-running performa
 ## Project Structure
 
 
-/
+
 ├── dist/              # The build output directory for deployment <br/>
 ├── node_modules/      # Project dependencies <br/>
 ├── src/ <br/>
@@ -130,5 +130,3 @@ Configure as a single-page app? No.
 Deploy:
 
 firebase deploy
-
-</markdown>
